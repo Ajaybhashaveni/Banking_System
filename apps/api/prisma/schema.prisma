@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  password       String
+  firstName      String
+  lastName       String
+  phone          String?        @unique
+  kycStatus      String         @default("PENDING") // PENDING, APPROVED, REJECTED
+  twoFactorSecret String?
+  is2FAEnabled   Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  accounts       Account[]
+  beneficiaries  Beneficiary[]
+  loans          Loan[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+}
+
+model Account {
+  id            String        @id @default(uuid())
+  accountNumber String        @unique
+  accountType   String        // SAVINGS, CURRENT
+  balance       Float         @default(0.0)
+  status        String        @default("ACTIVE") // ACTIVE, FROZEN, CLOSED
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  transactionsFrom Transaction[] @relation("FromAccount")
+  transactionsTo   Transaction[] @relation("ToAccount")
+  cards         Card[]
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  referenceId   String   @unique
+  amount        Float
+  type          String   // NEFT, RTGS, IMPS, UPI, INTERNAL
+  status        String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  description   String?
+  fromAccountId String?
+  fromAccount   Account? @relation("FromAccount", fields: [fromAccountId], references: [id])
+  toAccountId   String?
+  toAccount     Account? @relation("ToAccount", fields: [toAccountId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Beneficiary {
+  id            String   @id @default(uuid())
+  name          String
+  accountNumber String
+  ifscCode      String
+  bankName      String
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Card {
+  id            String   @id @default(uuid())
+  cardNumber    String   @unique
+  cardType      String   // DEBIT, CREDIT, VIRTUAL
+  expiryDate    String
+  cvv           String
+  pin           String?
+  status        String   @default("ACTIVE") // ACTIVE, FROZEN
+  accountId     String
+  account       Account  @relation(fields: [accountId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Loan {
+  id            String   @id @default(uuid())
+  loanType      String   // HOME, CAR, PERSONAL
+  amount        Float
+  interestRate  Float
+  tenureMonths  Int
+  emiAmount     Float
+  status        String   @default("PENDING") // PENDING, APPROVED, REJECTED, ACTIVE, CLOSED
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  type      String   // EMAIL, SMS, PUSH
+  read      Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  permissions Permission[]
+  admins      Admin[]
+}
+
+model Permission {
+  id     String @id @default(uuid())
+  name   String @unique
+  roles  Role[]
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  adminId   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}

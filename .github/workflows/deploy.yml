@@ -1,0 +1,44 @@
+name: NextGen Banking CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build API
+      run: npm run build --workspace=apps/api
+      
+    - name: Build Web
+      run: npm run build --workspace=apps/web
+
+  deploy-api:
+    needs: test-and-build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Cloud Run (Mock)
+        run: echo "Deploying API to Google Cloud Run..."
+
+  deploy-web:
+    needs: test-and-build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Vercel (Mock)
+        run: echo "Deploying Web to Vercel..."
