@@ -27,7 +27,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     try {
       setError(null);
-      const res = await axios.post('http://localhost:3001/auth/login', data);
+      const res = await axios.post('https://banking-system-n4s7.onrender.com/auth/login', data);
       localStorage.setItem('token', res.data.accessToken);
       router.push('/dashboard');
     } catch (err: any) {

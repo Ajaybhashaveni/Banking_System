@@ -20,7 +20,7 @@ export default function Dashboard() {
         return;
       }
       try {
-        const res = await axios.get('http://localhost:3001/users/profile', {
+        const res = await axios.get('https://banking-system-n4s7.onrender.com/users/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(res.data);

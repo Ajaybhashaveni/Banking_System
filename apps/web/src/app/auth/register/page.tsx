@@ -29,7 +29,7 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterForm) => {
     try {
       setError(null);
-      const res = await axios.post('http://localhost:3001/auth/register', data);
+      const res = await axios.post('https://banking-system-n4s7.onrender.com/auth/register', data);
       localStorage.setItem('token', res.data.accessToken);
       router.push('/dashboard');
     } catch (err: any) {

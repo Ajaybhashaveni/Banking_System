@@ -13,9 +13,9 @@ export default function AdminDashboard() {
     // In a real app we'd add authentication headers for the admin
     const fetchData = async () => {
       try {
-        const statsRes = await axios.get('http://localhost:3001/admin/stats');
+        const statsRes = await axios.get('https://banking-system-n4s7.onrender.com/admin/stats');
         setStats(statsRes.data);
-        const usersRes = await axios.get('http://localhost:3001/admin/users');
+        const usersRes = await axios.get('https://banking-system-n4s7.onrender.com/admin/users');
         setUsers(usersRes.data);
       } catch (err) {
         console.error(err);
@@ -26,7 +26,7 @@ export default function AdminDashboard() {
 
   const approveKyc = async (userId: string) => {
     try {
-      await axios.patch(`http://localhost:3001/admin/kyc/${userId}/approve`);
+      await axios.patch(`https://banking-system-n4s7.onrender.com/admin/kyc/${userId}/approve`);
       setUsers(users.map(u => u.id === userId ? { ...u, kycStatus: 'APPROVED' } : u));
     } catch (err) {
       console.error(err);
