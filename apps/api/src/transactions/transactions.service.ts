@@ -8,7 +8,7 @@ export class TransactionsService {
   async transfer(fromAccountId: string, toAccountNumber: string, amount: number, type: string) {
     if (amount <= 0) throw new BadRequestException('Amount must be positive');
 
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: any) => {
       const fromAccount = await tx.account.findUnique({ where: { id: fromAccountId } });
       if (!fromAccount) throw new NotFoundException('Source account not found');
       if (fromAccount.status !== 'ACTIVE') throw new BadRequestException('Source account is not active');
