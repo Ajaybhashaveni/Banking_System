@@ -16,4 +16,4 @@ COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 RUN cd apps/api && npx prisma@5.22.0 generate
 EXPOSE 3001
-CMD ["npm", "run", "start:prod", "--workspace=apps/api"]
+CMD ["sh", "-c", "cd apps/api && npx prisma@5.22.0 db push && node dist/main"]
