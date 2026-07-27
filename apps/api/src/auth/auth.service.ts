@@ -28,6 +28,16 @@ export class AuthService {
       },
     });
 
+    // Auto-create a SAVINGS account with demo balance
+    await this.prisma.account.create({
+      data: {
+        accountNumber: `NGN${Date.now()}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
+        accountType: 'SAVINGS',
+        balance: 1000.0,
+        userId: user.id,
+      },
+    });
+
     return this.generateTokens(user.id, user.email);
   }
 
