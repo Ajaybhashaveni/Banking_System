@@ -17,9 +17,11 @@ model User {
   firstName      String
   lastName       String
   phone          String?        @unique
+  upiId          String?        @unique
   kycStatus      String         @default("PENDING") // PENDING, APPROVED, REJECTED
   twoFactorSecret String?
   is2FAEnabled   Boolean        @default(false)
+  rewardPoints   Int            @default(0)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   accounts       Account[]
@@ -27,6 +29,15 @@ model User {
   loans          Loan[]
   notifications  Notification[]
   auditLogs      AuditLog[]
+  paymentRequestsSent     PaymentRequest[] @relation("RequestSender")
+  paymentRequestsReceived PaymentRequest[] @relation("RequestReceiver")
+  billPayments   BillPayment[]
+  recharges      Recharge[]
+  investments    Investment[]
+  goldHoldings   GoldHolding[]
+  rewards        Reward[]
+  splitGroups    SplitGroup[]
+  splitMembers   SplitMember[]
 }
 
 model Account {
@@ -48,9 +59,10 @@ model Transaction {
   id            String   @id @default(uuid())
   referenceId   String   @unique
   amount        Float
-  type          String   // NEFT, RTGS, IMPS, UPI, INTERNAL
+  type          String   // NEFT, RTGS, IMPS, UPI, BILL, RECHARGE, INVESTMENT
   status        String   @default("PENDING") // PENDING, COMPLETED, FAILED
   description   String?
+  category      String?  // TRANSFER, BILL, RECHARGE, INVESTMENT, GOLD, REWARD
   fromAccountId String?
   fromAccount   Account? @relation("FromAccount", fields: [fromAccountId], references: [id])
   toAccountId   String?
@@ -108,6 +120,98 @@ model Notification {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model PaymentRequest {
+  id          String   @id @default(uuid())
+  amount      Float
+  note        String?
+  status      String   @default("PENDING") // PENDING, PAID, DECLINED
+  senderId    String
+  sender      User     @relation("RequestSender", fields: [senderId], references: [id])
+  receiverId  String
+  receiver    User     @relation("RequestReceiver", fields: [receiverId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BillPayment {
+  id             String   @id @default(uuid())
+  category       String   // ELECTRICITY, WATER, GAS, INTERNET, DTH, BROADBAND
+  provider       String
+  consumerNumber String
+  amount         Float
+  status         String   @default("COMPLETED")
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  createdAt      DateTime @default(now())
+}
+
+model Recharge {
+  id           String   @id @default(uuid())
+  mobileNumber String
+  operator     String   // JIO, AIRTEL, VI, BSNL
+  planType     String   // PREPAID, POSTPAID
+  amount       Float
+  planDetails  String?
+  status       String   @default("COMPLETED")
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+model Investment {
+  id         String   @id @default(uuid())
+  fundName   String
+  fundType   String   // EQUITY, DEBT, HYBRID
+  amount     Float
+  units      Float
+  navPrice   Float
+  status     String   @default("ACTIVE") // ACTIVE, SOLD
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model GoldHolding {
+  id            String   @id @default(uuid())
+  grams         Float
+  purchasePrice Float
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+}
+
+model Reward {
+  id          String   @id @default(uuid())
+  points      Int
+  type        String   // EARNED, REDEEMED, SCRATCH_CARD
+  description String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model SplitGroup {
+  id          String        @id @default(uuid())
+  name        String
+  totalAmount Float
+  creatorId   String
+  creator     User          @relation(fields: [creatorId], references: [id])
+  members     SplitMember[]
+  createdAt   DateTime      @default(now())
+}
+
+model SplitMember {
+  id          String     @id @default(uuid())
+  amount      Float
+  paid        Boolean    @default(false)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  groupId     String
+  group       SplitGroup @relation(fields: [groupId], references: [id])
+  createdAt   DateTime   @default(now())
 }
 
 model Admin {

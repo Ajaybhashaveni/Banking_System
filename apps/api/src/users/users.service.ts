@@ -19,7 +19,15 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const { password, ...result } = user as any;
+    const { password, twoFactorSecret, ...result } = user as any;
     return result;
+  }
+
+  async findByUpiId(upiId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { upiId },
+      select: { id: true, firstName: true, lastName: true, upiId: true },
+    });
+    return user;
   }
 }

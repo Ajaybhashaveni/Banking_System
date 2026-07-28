@@ -9,6 +9,11 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { CardsModule } from './cards/cards.module';
 import { LoansModule } from './loans/loans.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { UpiModule } from './upi/upi.module';
+import { BillsModule } from './bills/bills.module';
+import { RechargeModule } from './recharge/recharge.module';
+import { InvestmentsModule } from './investments/investments.module';
+import { RewardsModule } from './rewards/rewards.module';
 
 @Module({
   imports: [
@@ -20,6 +25,11 @@ import { NotificationsModule } from './notifications/notifications.module';
     CardsModule,
     LoansModule,
     NotificationsModule,
+    UpiModule,
+    BillsModule,
+    RechargeModule,
+    InvestmentsModule,
+    RewardsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
